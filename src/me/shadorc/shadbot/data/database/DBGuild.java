@@ -1,76 +1,51 @@
 package me.shadorc.shadbot.data.database;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import discord4j.core.object.util.Snowflake;
-import me.shadorc.shadbot.Config;
-import me.shadorc.shadbot.core.setting.SettingEnum;
+import me.shadorc.shadbot.Shadbot;
 
 public class DBGuild {
 
-	@JsonProperty("id")
-	private final Long id;
-	@JsonProperty("members")
-	private final CopyOnWriteArrayList<DBMember> members;
-	@JsonProperty("settings")
-	private final ConcurrentHashMap<String, Object> settings;
+	private final Long guild_id;
 
-	public DBGuild(Snowflake id) {
-		this.id = id.asLong();
-		this.members = new CopyOnWriteArrayList<>();
-		this.settings = new ConcurrentHashMap<>();
+	public DBGuild(Snowflake guild_id) {
+		this.guild_id = guild_id.asLong();
 	}
 
-	public DBGuild() {
-		this(Snowflake.of(0L));
+	public Snowflake getGuildId() {
+		return Snowflake.of(this.guild_id);
 	}
 
-	@JsonIgnore
-	public Snowflake getId() {
-		return Snowflake.of(this.id);
-	}
-
-	@JsonIgnore
 	public List<DBMember> getMembers() {
-		return this.members;
+		return Shadbot.getJdbi().withHandle(handle -> handle.createQuery("SELECT * FROM member WHERE guild_id = :guild_id")
+				.bind("guild_id", this.getGuildId().asLong())
+				.mapTo(DBMember.class)
+				.list());
 	}
 
-	@JsonIgnore
-	public List<Snowflake> getAllowedTextChannels() {
-		return this.getListSetting(SettingEnum.ALLOWED_TEXT_CHANNELS, Long.class)
-				.stream()
-				.map(Snowflake::of)
-				.collect(Collectors.toList());
+	/*
+	public List<Long> getAllowedTextChannels() {
+		return Shadbot.getJdbi().withHandle(handle -> handle.createQuery("SELECT channel_id FROM allowed_text_channel WHERE guild_id = :guild_id")
+				.bind("guild_id", this.getGuildId().asLong())
+				.mapTo(Long.class)
+				.list());
 	}
 
-	@JsonIgnore
-	public List<Snowflake> getAllowedVoiceChannels() {
-		return this.getListSetting(SettingEnum.ALLOWED_VOICE_CHANNELS, Long.class)
-				.stream()
-				.map(Snowflake::of)
-				.collect(Collectors.toList());
+	public List<Long> getAllowedVoiceChannels() {
+		return Shadbot.getJdbi().withHandle(handle -> handle.createQuery("SELECT channel_id FROM allowed_voice_channel WHERE guild_id = :guild_id")
+				.bind("guild_id", this.getGuildId().asLong())
+				.mapTo(Long.class)
+				.list());
 	}
 
-	@JsonIgnore
-	public List<Snowflake> getAllowedRoles() {
-		return this.getListSetting(SettingEnum.ALLOWED_ROLES, Long.class)
-				.stream()
-				.map(Snowflake::of)
-				.collect(Collectors.toList());
+	public List<Long> getAllowedRoles() {
+		return Shadbot.getJdbi().withHandle(handle -> handle.createQuery("SELECT role_id FROM allowed_role WHERE guild_id = :guild_id")
+				.bind("guild_id", this.getGuildId().asLong())
+				.mapTo(Long.class)
+				.list());
 	}
 
-	@JsonIgnore
 	public List<Snowflake> getAutoRoles() {
 		return this.getListSetting(SettingEnum.AUTO_ROLES, Long.class)
 				.stream()
@@ -78,45 +53,34 @@ public class DBGuild {
 				.collect(Collectors.toList());
 	}
 
-	@JsonIgnore
 	public List<String> getBlacklistedCmd() {
 		return this.getListSetting(SettingEnum.BLACKLIST, String.class);
 	}
 
-	@JsonIgnore
 	public Integer getDefaultVol() {
 		return Integer.parseInt(Objects.toString(
 				this.settings.get(SettingEnum.DEFAULT_VOLUME.toString()),
 				Integer.toString(Config.DEFAULT_VOLUME)));
 	}
 
-	/**
-	 * @return A map containing message's ID as key and role's ID as value
-	 */
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
 	public Map<String, Long> getIamMessages() {
 		return (Map<String, Long>) Optional.ofNullable(this.settings.get(SettingEnum.IAM_MESSAGES.toString()))
 				.orElse(new HashMap<>());
 	}
 
-	@JsonIgnore
 	public Optional<String> getJoinMessage() {
 		return Optional.ofNullable((String) this.settings.get(SettingEnum.JOIN_MESSAGE.toString()));
 	}
 
-	@JsonIgnore
 	public Optional<String> getLeaveMessage() {
 		return Optional.ofNullable((String) this.settings.get(SettingEnum.LEAVE_MESSAGE.toString()));
 	}
 
-	@JsonIgnore
 	public Optional<Snowflake> getMessageChannelId() {
 		return Optional.ofNullable((Long) this.settings.get(SettingEnum.MESSAGE_CHANNEL_ID.toString()))
 				.map(Snowflake::of);
 	}
 
-	@JsonIgnore
 	public String getPrefix() {
 		return Objects.toString(
 				this.settings.get(SettingEnum.PREFIX.toString()),
@@ -142,10 +106,7 @@ public class DBGuild {
 	public void addMember(DBMember dbMember) {
 		this.members.add(dbMember);
 	}
-
-	@Override
-	public String toString() {
-		return String.format("DBGuild [id=%s, members=%s, settings=%s]", this.id, this.members, this.settings);
-	}
+	
+	*/
 
 }

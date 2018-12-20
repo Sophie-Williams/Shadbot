@@ -102,7 +102,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jdbi</groupId>
-			<artifactId>jdbi3-sqlobject</artifactId>
+			<artifactId>jdbi3-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.jdbi.v3.core.Jdbi;
+
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.Event;
@@ -62,10 +64,15 @@ public class Shadbot {
 	private static LotteryManager lotteryManager;
 	private static StatsManager statsManager;
 	private static BotListStats botListStats;
+	
+	private static Jdbi jdbi;
 
 	public static void main(String[] args) {
 		// Set default to Locale US
 		Locale.setDefault(Locale.US);
+		
+		//TODO
+		jdbi = Jdbi.create("jdbc:h2:mem:test");
 
 		try {
 			Shadbot.databaseManager = new DatabaseManager();
@@ -140,6 +147,10 @@ public class Shadbot {
 
 	public static StatsManager getStatsManager() {
 		return statsManager;
+	}
+	
+	public static Jdbi getJdbi() {
+		return jdbi;
 	}
 
 	private static <T extends Event> void register(DiscordClient client, Class<T> eventClass, Consumer<? super T> consumer) {
